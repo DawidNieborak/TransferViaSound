@@ -127,12 +127,12 @@ void AudioRecorder::togglePause()
         m_audioRecorder->record();
 }
 
-void AudioRecorder::setOutputLocation()
-{
-    QString fileName = "recorderAudio";
-    m_audioRecorder->setOutputLocation(fileName);
-    m_outputLocationSet = true;
-}
+//void AudioRecorder::setOutputLocation()
+//{
+//    QString fileName = "recorderAudio";
+//    m_audioRecorder->setOutputLocation(fileName);
+//    m_outputLocationSet = true;
+//}
 
 void AudioRecorder::displayErrorMessage()
 {

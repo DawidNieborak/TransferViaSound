@@ -79,7 +79,6 @@ public slots:
     void processBuffer(const QAudioBuffer&);
 
 private slots:
-    void setOutputLocation();
     void togglePause();
     void toggleRecord();
 

@@ -29,13 +29,6 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QPushButton" name="outputButton">
-      <property name="text">
-       <string>Output...</string>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="2">
      <widget class="QPushButton" name="pauseButton">
       <property name="enabled">
@@ -98,22 +91,6 @@
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>outputButton</sender>
-   <signal>clicked()</signal>
-   <receiver>AudioRecorder</receiver>
-   <slot>setOutputLocation()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>46</x>
-     <y>340</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>6</x>
-     <y>302</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>recordButton</sender>
    <signal>clicked()</signal>
