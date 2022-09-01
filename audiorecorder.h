@@ -106,6 +106,7 @@ private:
     QMediaRecorder *m_audioRecorder = nullptr;
     QList<AudioLevel*> m_audioLevels;
     bool m_outputLocationSet = false;
+    double window[];
 };
 
 #endif // AUDIORECORDER_H

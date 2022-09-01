@@ -10,11 +10,13 @@ HEADERS = \
     asciibreaker.h \
     audiorecorder.h \
     audiolevel.h \
-    decoder.h
+    decoder.h \
+    extractor.h
 
 SOURCES = \
     asciibreaker.cpp \
     decoder.cpp \
+    extractor.cpp \
     main.cpp \
     audiorecorder.cpp \
     audiolevel.cpp
@@ -64,3 +66,10 @@ else:unix: LIBS += -L$$PWD/../../../../../../../usr/local/Cellar/cpr/1.8.3/lib/ 
 
 INCLUDEPATH += $$PWD/../../../../../../../usr/local/Cellar/cpr/1.8.3/include
 DEPENDPATH += $$PWD/../../../../../../../usr/local/Cellar/cpr/1.8.3/include
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../../../../usr/local/Cellar/fftw/3.3.10_1/lib/release/ -lfftw3.3
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../../../../usr/local/Cellar/fftw/3.3.10_1/lib/debug/ -lfftw3.3
+else:unix: LIBS += -L$$PWD/../../../../../../../usr/local/Cellar/fftw/3.3.10_1/lib/ -lfftw3.3
+
+INCLUDEPATH += $$PWD/../../../../../../../usr/local/Cellar/fftw/3.3.10_1/include
+DEPENDPATH += $$PWD/../../../../../../../usr/local/Cellar/fftw/3.3.10_1/include

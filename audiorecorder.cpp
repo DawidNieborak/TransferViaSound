@@ -10,6 +10,7 @@
 #include "asciibreaker.h"
 #include "Sound.h"
 #include "decoder.h"
+#include "extractor.h"
 
 #include <QAudioDecoder>
 #include <QMediaRecorder>
@@ -296,28 +297,37 @@ void AudioRecorder::on_createWav_clicked()
 
 void AudioRecorder::on_decodeFile_clicked()
 {
-    return;
-//     QFileInfo *audio = new QFileInfo("/Users/dawid/Music/recorderAudio.wav");
-//    sf::InputSoundFile file;
-//    if (!file.openFromFile(audio->filePath().toStdString()))
-//        std::cout << "Error" << std::endl;
 
-//    std::cout << "duration: " << file.getDuration().asSeconds() << std::endl;
-//    std::cout << "channels: " << file.getChannelCount() << std::endl;
-//    std::cout << "sample rate: " << file.getSampleRate() << std::endl;
-//    std::cout << "sample count: " << file.getSampleCount() << std::endl;
+    QFileInfo *audio = new QFileInfo("/Users/dawid/Music/recorderAudio.wav");
+    sf::InputSoundFile file;
+    if (!file.openFromFile(audio->filePath().toStdString()))
+        std::cout << "Error" << std::endl;
 
-//    // Read and process batches of samples until the end of file is reached
-//    sf::Int16 samples[1024];
-//    sf::Uint64 count;
-//    do
-//    {
-//        count = file.read(samples, 1024);
+    std::cout << "duration: " << file.getDuration().asSeconds() << std::endl;
+    std::cout << "channels: " << file.getChannelCount() << std::endl;
+    std::cout << "sample rate: " << file.getSampleRate() << std::endl;
+    std::cout << "sample count: " << file.getSampleCount() << std::endl;
+    // Read and process batches of samples until the end of file is reached
+    sf::Int16 samples[1024];
+    sf::Uint16 count;
+    extractor ex;
+    short data[1024];
+    int i = 0;
+    do
+    {
+        count = file.read(samples, 1024);
+        data[i] = samples[i];
 
-//        std::cout << count << std::endl;
-//        // process, analyze, play, convert, or whatever
-//        // you want to do with the samples...
-//    }
-//    while (count > 0);
+        auto frequency = ex.extract((sizeof(data) / sizeof(*data)), data, file.getSampleRate());
+        if(frequency > 800) {
+            std::cout << frequency << std::endl;
+        }
+
+        // process, analyze, play, convert, or whatever
+        // you want to do with the samples...
+        i++;
+    }
+    while (count > 0);
+
 
 }
