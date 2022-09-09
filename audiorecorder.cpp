@@ -2,6 +2,7 @@
 #include "audiolevel.h"
 #include <curl/curl.h>
 #include <cpr/cpr.h>
+#include <json/json.h>
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
@@ -48,6 +49,19 @@ AudioRecorder::AudioRecorder()
     connect(m_audioRecorder, &QMediaRecorder::durationChanged, this, &AudioRecorder::updateProgress);
     connect(m_audioRecorder, &QMediaRecorder::recorderStateChanged, this, &AudioRecorder::onStateChanged);
     connect(m_audioRecorder, &QMediaRecorder::errorChanged, this, &AudioRecorder::displayErrorMessage);
+
+    // check status of the server
+    Json::Value response;
+    Json::Reader reader;
+    cpr::Response r = cpr::Get(cpr::Url{"https://zaliczeniebackend.azurewebsites.net/health/ready"});
+    reader.parse(r.text, response);
+
+    if(response["status"] == "Healthy") {
+        ui->statusBtn->setStyleSheet("QPushButton { background-color: green; border-radius: 25px; }\n");
+    } else {
+        ui->statusBtn->setStyleSheet("QPushButton { background-color: red; border-radius: 25px; }\n");
+        ui->label_2->setText("Application would'nt work because of inaccessibility to the server.");
+    }
 }
 
 void AudioRecorder::updateProgress(qint64 duration)
