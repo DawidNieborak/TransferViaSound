@@ -11,7 +11,8 @@ HEADERS = \
     audiorecorder.h \
     audiolevel.h \
     decoder.h \
-    extractor.h
+    extractor.h \
+    audioFFT.h
 
 SOURCES = \
     asciibreaker.cpp \
@@ -19,7 +20,8 @@ SOURCES = \
     extractor.cpp \
     main.cpp \
     audiorecorder.cpp \
-    audiolevel.cpp
+    audiolevel.cpp \
+    audioFFT.cpp
 
 FORMS += audiorecorder.ui
 

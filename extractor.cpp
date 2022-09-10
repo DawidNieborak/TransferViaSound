@@ -2,10 +2,11 @@
 #include <fftw3.h>
 #include <cmath>
 #include <iostream>
+#include "audioFFT.h"
 #include <numbers>
+#include <SFML/Audio.hpp>
+#include <vector>
 
-#define REAL 0
-#define IMAG 1
 #define PI 3.14159265359
 
 extractor::extractor()
@@ -16,22 +17,22 @@ extractor::extractor()
 
 // BLAD JEST NASTEPUJACY fftw POZWALA TYLKO NA FFT ZA POMOCA FFTW_COMPLEX A JA POTRZEBUJE ZROBIC FFT Z SHORT[]
 
-double extractor::extract(int numberOfArray, short data[], int sampleRate) {
-//    fftw_complex x[numberOfArray];
-
-//    fftw_complex outputArray[numberOfArray];
-
-//    for(int i = 0; i < numberOfArray; i++) {
-//        x[i][REAL] = i + 1;
-//        x[i][IMAG] = 0;
-//    }
-
-
+double extractor::extract(int numberOfArray, sf::Int16 data[], int sampleRate) {
+    const size_t fftSize = (sizeof(data)/sizeof(*data)) + 24 * (sizeof(data)/sizeof(*data));
     double a[((sizeof(data) / sizeof(*data)) + 24 * (sizeof(data) / sizeof(*data))) * 2];
     std::memcpy(this->applyWindow(data), a, (sizeof(data) / sizeof(*data))); //applyWindow(data)
 
-//    fftw_plan plan = fftw_plan_dft_1d(numberOfArray, x, outputArray, FFTW_FORWARD, FFTW_ESTIMATE);
-//    fftw_execute(plan);
+    std::vector<float> input(fftSize, 0.0f);
+    std::vector<float> re(audiofft::AudioFFT::ComplexSize(fftSize));
+    std::vector<float> im(audiofft::AudioFFT::ComplexSize(fftSize));
+    std::vector<float> output(fftSize);
+
+    audiofft::AudioFFT fft;
+//    fft.init(1024);
+    fft.init((sizeof(data)/sizeof(*data)));
+    fft.fft(input.data(), re.data(), im.data());
+
+    // co dalej?
 
     double maxMag = -std::numeric_limits<double>::infinity();
     int maxInd = -1;

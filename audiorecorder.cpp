@@ -325,14 +325,13 @@ void AudioRecorder::on_decodeFile_clicked()
     sf::Int16 samples[1024];
     sf::Uint16 count;
     extractor ex;
-    short data[1024];
+
     int i = 0;
     do
     {
         count = file.read(samples, 1024);
-        data[i] = samples[i];
 
-        auto frequency = ex.extract((sizeof(data) / sizeof(*data)), data, file.getSampleRate());
+        auto frequency = ex.extract((sizeof(samples) / sizeof(*samples)), samples, file.getSampleRate());
         if(frequency > 800) {
             std::cout << frequency << std::endl;
         }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>635</width>
-    <height>573</height>
+    <height>579</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,13 +15,10 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
-    <item row="2" column="3">
-     <widget class="QPushButton" name="pauseButton">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
+    <item row="2" column="5">
+     <widget class="QPushButton" name="recordButton">
       <property name="text">
-       <string>Pause</string>
+       <string>Record</string>
       </property>
      </widget>
     </item>
@@ -32,36 +29,35 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="2">
+    <item row="4" column="5">
      <widget class="QPushButton" name="decodeFile">
       <property name="text">
        <string>Decode File</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="2">
-     <widget class="QPushButton" name="recordButton">
-      <property name="text">
-       <string>Record</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="3">
+    <item row="3" column="6">
      <widget class="QPushButton" name="sendButton">
       <property name="text">
        <string>Send File</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="0" colspan="4">
+    <item row="0" column="2">
+     <widget class="QLabel" name="label_2">
+      <property name="maximumSize">
+       <size>
+        <width>250</width>
+        <height>50</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Status of the server accessibility</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="7">
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Input Device:</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QComboBox" name="audioDeviceBox">
         <property name="enabled">
@@ -69,12 +65,55 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Input Device:</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
-    <item row="0" column="0">
+    <item row="3" column="0">
+     <widget class="QPushButton" name="pushButton">
+      <property name="text">
+       <string>GET_LIST</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="5">
+     <widget class="QPushButton" name="file">
+      <property name="text">
+       <string>Choose File</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="6">
+     <widget class="QPushButton" name="pauseButton">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Pause</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1" alignment="Qt::AlignLeft">
      <widget class="QPushButton" name="statusBtn">
       <property name="enabled">
        <bool>false</bool>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>25</width>
+        <height>25</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>25</width>
+        <height>25</height>
+       </size>
       </property>
       <property name="text">
        <string/>
@@ -84,24 +123,10 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QPushButton" name="pushButton">
+    <item row="4" column="6">
+     <widget class="QPushButton" name="listenBtn">
       <property name="text">
-       <string>GET_LIST</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="2">
-     <widget class="QPushButton" name="file">
-      <property name="text">
-       <string>Choose File</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>Status of the server accessibility</string>
+       <string>Listen</string>
       </property>
      </widget>
     </item>
