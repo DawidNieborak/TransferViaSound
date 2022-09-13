@@ -33,6 +33,7 @@ AudioRecorder::AudioRecorder()
     : ui(new Ui::AudioRecorder)
 {
     ui->setupUi(this);
+    this->setWindowTitle("Transfer files via sound");
 
     m_audioRecorder = new QMediaRecorder(this);
     m_captureSession.setRecorder(m_audioRecorder);
@@ -79,24 +80,24 @@ void AudioRecorder::onStateChanged(QMediaRecorder::RecorderState state)
     switch (state) {
     case QMediaRecorder::RecordingState:
         statusMessage = tr("Recording to %1").arg(m_audioRecorder->actualLocation().toString());
-        ui->recordButton->setText(tr("Stop"));
-        ui->pauseButton->setText(tr("Pause"));
+//        ui->recordButton->setText(tr("Stop"));
+//        ui->pauseButton->setText(tr("Pause"));
         break;
     case QMediaRecorder::PausedState:
         clearAudioLevels();
         statusMessage = tr("Paused");
-        ui->recordButton->setText(tr("Stop"));
-        ui->pauseButton->setText(tr("Resume"));
+//        ui->recordButton->setText(tr("Stop"));
+//        ui->pauseButton->setText(tr("Resume"));
         break;
     case QMediaRecorder::StoppedState:
         clearAudioLevels();
         statusMessage = tr("Stopped");
-        ui->recordButton->setText(tr("Record"));
-        ui->pauseButton->setText(tr("Pause"));
+//        ui->recordButton->setText(tr("Record"));
+//        ui->pauseButton->setText(tr("Pause"));
         break;
     }
 
-    ui->pauseButton->setEnabled(m_audioRecorder->recorderState() != QMediaRecorder::StoppedState);
+//    ui->pauseButton->setEnabled(m_audioRecorder->recorderState() != QMediaRecorder::StoppedState);
     if (m_audioRecorder->error() == QMediaRecorder::NoError)
         ui->statusbar->showMessage(statusMessage);
 }
@@ -196,6 +197,24 @@ void AudioRecorder::on_sendFileMain_clicked()
        return;
 
    int number = rand() % 90000000 + 10000000;
+   // TODO
+//   int resultNum = 0;
+//   int ngenNumber[8];
+//   for(int i = 0; i < 30; i++) {
+//       int random = (rand() % 10) + 1;
+//       if((sizeof(ngenNumber)/sizeof(*ngenNumber)) >= 8) {
+//           break;
+//       }
+//       if(random != 0 ) {
+//           ngenNumber[i] = random;
+//       }
+//   }
+
+//   for ( const auto digit : ngenNumber )
+//   {
+//       std::cout << "TTT: " << digit << std::endl;
+//       resultNum = resultNum * 10 + digit;
+//   }
    std::cout << "OUTPUY NUMBER: " << number << std::endl;
 
    QFileInfo file(filename);
