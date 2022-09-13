@@ -1,6 +1,5 @@
 #include "audiorecorder.h"
 #include "audiolevel.h"
-#include <curl/curl.h>
 #include <cpr/cpr.h>
 #include <json/json.h>
 
@@ -11,7 +10,6 @@
 #include <cmath>
 #include "asciibreaker.h"
 #include "Sound.h"
-#include "GetFrequencies.h"
 #include "Audio.h"
 #include "decoder.h"
 
@@ -114,26 +112,7 @@ static QVariant boxValue(const QComboBox *box)
 
 void AudioRecorder::toggleRecord()
 {
-    QString fileName = "recorderAudio";
-    m_audioRecorder->setOutputLocation(fileName);
-    if (m_audioRecorder->recorderState() == QMediaRecorder::StoppedState) {
-        m_captureSession.audioInput()->setDevice(boxValue(ui->audioDeviceBox).value<QAudioDevice>());
-
-        m_audioRecorder->setMediaFormat(selectedMediaFormat());
-        m_audioRecorder->setAudioSampleRate(44100);
-        m_audioRecorder->setAudioBitRate(128000);
-        m_audioRecorder->setAudioChannelCount(1);
-        m_audioRecorder->setQuality(QMediaRecorder::VeryHighQuality);
-        m_audioRecorder->setEncodingMode(QMediaRecorder::ConstantQualityEncoding);
-        // options
-        // QMediaRecorder::ConstantQualityEncoding :
-        // QMediaRecorder::ConstantBitRateEncoding
-
-        m_audioRecorder->record();
-    }
-    else {
-        m_audioRecorder->stop();
-    }
+    return;
 }
 
 void AudioRecorder::togglePause()
@@ -209,14 +188,12 @@ void AudioRecorder::processBuffer(const QAudioBuffer& buffer)
         m_audioLevels.at(i)->setLevel(levels.at(i));
 }
 
-void AudioRecorder::on_file_clicked()
+void AudioRecorder::on_sendFileMain_clicked()
 {
     QString filename= QFileDialog::getOpenFileName(this, "Choose File");
 
-
    if(filename.isEmpty())
        return;
-
 
    int number = rand() % 90000000 + 10000000;
    std::cout << "OUTPUY NUMBER: " << number << std::endl;
@@ -225,8 +202,7 @@ void AudioRecorder::on_file_clicked()
    QFile fileToCopy(filename);
 
    // todo: delete files from copied folder in order to prevent build failure
-   fileToCopy.setFileName(QString::fromStdString(std::to_string(333111222)) + "." + file.completeSuffix());
-
+   fileToCopy.setFileName(QString::fromStdString(std::to_string(number)) + "." + file.completeSuffix());
 
 
    QFileInfo newFileInfo(fileToCopy.fileName());
@@ -235,193 +211,94 @@ void AudioRecorder::on_file_clicked()
    QFile::copy(file.absoluteFilePath(), this->filePath);
    std::cout << "FILEPATH: " << this->filePath.toStdString() << std::endl;
    std::cout << "FILE NAME: " << this->fileName.toStdString() << std::endl;
+
+
+   // send file
+    ui->statusbar->showMessage("Please wait a little...");
+   cpr::Response r = cpr::Post(cpr::Url{"https://zaliczeniebackend.azurewebsites.net/api/files"},
+                      cpr::Multipart{{"files", cpr::File{this->filePath.toStdString()}}});
+
+
+   if(r.status_code == 200) {
+        generateSineWave();
+   }
+   else {
+        ui->statusbar->showMessage("Couldn't send file to the server. Please try again.");
+   }
 }
 
+void AudioRecorder::generateSineWave() {
+    ASCIIBreaker asciiBreaker(this->fileName.toInt());
+    auto freq = asciiBreaker.ASCIIToFrequency();
+    sf::RenderWindow window(sf::VideoMode (100,500), "Close to stop");
 
-void AudioRecorder::on_sendButton_clicked()
-{
-    // send file
-    cpr::Response r = cpr::Post(cpr::Url{"https://zaliczeniebackend.azurewebsites.net/api/files"},
-                       cpr::Multipart{{"files", cpr::File{this->filePath.toStdString()}}});
+    const unsigned short n_frequencies = 8;
+    sf::SoundBuffer buffer;
+    std::vector<sf::Int16> samples;
 
-    std::cout << r.status_code << std::endl;
-
-    // DEBUG:
-    std::cout << r.text << std::endl;
-}
-
-
-void AudioRecorder::on_createWav_clicked()
-{
-        ASCIIBreaker asciiBreaker(this->fileName.toInt());
-
-
-        // Debug
-//        ASCIIBreaker asciiBreaker(12345678);
-        auto freq = asciiBreaker.ASCIIToFrequency();
-
-        // debug
-        for(int i = 0; i < freq.size(); i ++) {
-            auto item = asciiBreaker.frequencyToNumber(freq[i]);
-
-            std::cout << "TUTAJ: " << item << std::endl;
+    for (int i = 0; i < n_frequencies; ++i) {
+        for (int j = 0; j < 44100; j++) {
+            samples.push_back(sound::SineWave(j, freq[i], 0.9));
         }
-
-
-        sf::RenderWindow window(sf::VideoMode (200,200), "audio");
-
-        const unsigned short n_frequencies = 8;
-        sf::SoundBuffer buffer;
-        std::vector<sf::Int16> samples;
-
-
-        for (int i = 0; i < n_frequencies; ++i) {
-            for (int j = 0; j < 44100; j++) {
-                samples.push_back(sound::SineWave(j, freq[i], 0.9));
-            }
-        }
-
-        buffer.loadFromSamples(&samples[0], samples.size(), 1, 44100);
-
-        sf::Sound sound;
-        sound.setBuffer(buffer);
-
-        sound.play();
-        sound.setLoop(true);
-
-        while (window.isOpen()) {
-            sf::Event event;
-
-            while (window.pollEvent(event)) {
-                if (event.type == sf::Event::Closed) {
-                    sound.stop();
-                    window.close();
-                }
-            }
-        }
-
-        window.display();
-}
-
-
-void AudioRecorder::on_decodeFile_clicked()
-{
-
-    QFileInfo *audio = new QFileInfo("/Users/dawid/Music/recorderAudio.wav");
-    sf::InputSoundFile file;
-    if (!file.openFromFile(audio->filePath().toStdString()))
-        std::cout << "Error" << std::endl;
-
-    std::cout << "duration: " << file.getDuration().asSeconds() << std::endl;
-    std::cout << "channels: " << file.getChannelCount() << std::endl;
-    std::cout << "sample rate: " << file.getSampleRate() << std::endl;
-    std::cout << "sample count: " << file.getSampleCount() << std::endl;
-    // Read and process batches of samples until the end of file is reached
-    sf::Int16 samples[1024];
-    sf::Uint16 count;
-
-
-    do
-    {
-        count = file.read(samples, 1024);
-
-        std::cout << samples << std::endl;
-
     }
-    while (count > 0);
 
+    buffer.loadFromSamples(&samples[0], samples.size(), 1, 44100);
 
-}
+    sf::Sound sound;
+    sound.setBuffer(buffer);
 
-void AudioRecorder::on_listenBtn_clicked()
-{
-    sf::RenderWindow window(sf::VideoMode(1280, 720), "Audio-Visualizer", sf::Style::Default);
-    window.setFramerateLimit(60);
+    sound.play();
+    sound.setLoop(true);
 
-    std::vector<char> code;
-    Audio audio = Audio();
-    std::thread frequencyAnalyzationThread(&Audio::getSampleOverFrequency, &audio);
-    GetFrequencies getFrequencies = GetFrequencies();
+    while (window.isOpen()) {
+        sf::Event event;
 
-
-
-
-    // Window Loop
-    while (window.isOpen())
-        {
-            sf::Event event;
-            while (window.pollEvent(event))
-            {
-                if (event.type == sf::Event::Closed) {
-
-
-                    window.close();
-                }
-
-                if (event.type == sf::Event::KeyPressed) {
-                    std::string s(code.begin(), code.end());
-                    std::cout << "CODE : " << s << std::endl;
-
-                    cpr::Response r = cpr::Get(cpr::Url{"https://zaliczeniebackend.azurewebsites.net/api/files/"+s});
-
-                    std::cout << "TOTU: " << r.status_code << std::endl;
-
-                    // DEBUG:
-                    std::cout << r.text << std::endl;
-                }
-
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                sound.stop();
+                window.close();
             }
-
-            window.clear(sf::Color::White);
-
-            if (audio.getfrequencyVisualizationVector().size() > 120) {
-
-                getFrequencies.setAmplitudeVisualizationVector(audio.getAmplitudeVisualizationVector());
-                getFrequencies.update(audio.getfrequencyVisualizationVector(), audio.getSongPlayingOffset());
-
-
-                // Draws freq visualizer
-                std::vector<sf::RectangleShape> freqRangeRects = getFrequencies.getFreqRangeRects();
-
-                for (int i = 0; i < freqRangeRects.size(); i++) {
-//                    window.draw(freqRangeRects[i]);
-                    auto test22 = getFrequencies.getMaxFreq() * -1;
-                    auto xdd = freqRangeRects[i].getSize().y * -1;
-                    if (xdd != 0) {
-//                        std::cout << round(test22) << " ";
-
-                        Decoder decode = Decoder(round(test22));
-                        auto xd = decode.convertFrequencyToArray();
-
-                        if(xd != 0) {
-                            code.push_back(xd);
-                        }
-
-                    }
-
-                }
-
-                if (!audio.songPlayed()) {
-                    audio.playSong();
-                }
-
-            }
-
-
-
-            window.display();
+        }
     }
-}
 
+    window.display();
+}
 
 void AudioRecorder::on_reciveFileMain_clicked()
 {
+    QString fileName = "recorderAudio";
+    m_audioRecorder->setOutputLocation(fileName);
+    if (m_audioRecorder->recorderState() == QMediaRecorder::StoppedState) {
+        m_captureSession.audioInput()->setDevice(boxValue(ui->audioDeviceBox).value<QAudioDevice>());
+
+        m_audioRecorder->setMediaFormat(selectedMediaFormat());
+        m_audioRecorder->setAudioSampleRate(44100);
+        m_audioRecorder->setAudioBitRate(128000);
+        m_audioRecorder->setAudioChannelCount(1);
+        m_audioRecorder->setQuality(QMediaRecorder::VeryHighQuality);
+        m_audioRecorder->setEncodingMode(QMediaRecorder::ConstantQualityEncoding);
+
+        auto time = 17;
+        time *= CLOCKS_PER_SEC;
+
+        clock_t now = clock();
+
+        m_audioRecorder->record();
+        while(clock() - now < time);
+        m_audioRecorder->stop();
+
+    }
+    else {
+        m_audioRecorder->stop();
+    }
 
 }
 
+// generate sfml window and decode;
+void AudioRecorder::decode() {
+    sf::RenderWindow window(sf::VideoMode(100, 500), "Audio-decoder Close to Stop", sf::Style::Default);
+    window.setFramerateLimit(60);
 
-void AudioRecorder::on_sendFileMain_clicked()
-{
-
+    Audio audio = Audio();
+    std::thread frequencyAnalyzationThread(&Audio::getSampleOverFrequency, &audio);
 }
-

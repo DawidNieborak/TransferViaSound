@@ -30,23 +30,22 @@ public slots:
 
 private slots:
     void togglePause();
+
     void toggleRecord();
 
     void onStateChanged(QMediaRecorder::RecorderState);
+
     void updateProgress(qint64 pos);
+
     void displayErrorMessage();
 
-    void on_pushButton_clicked();
+    void on_sendFileMain_clicked();
 
-    void on_file_clicked();
+    void generateSineWave();
 
-    void on_sendButton_clicked();
+    void decode();
 
-    void on_createWav_clicked();
-
-    void on_decodeFile_clicked();
-
-    void on_listenBtn_clicked();
+    void on_reciveFileMain_clicked();
 
 private:
     void clearAudioLevels();
@@ -58,7 +57,6 @@ private:
     QMediaRecorder *m_audioRecorder = nullptr;
     QList<AudioLevel*> m_audioLevels;
     bool m_outputLocationSet = false;
-    double window[];
 };
 
 #endif // AUDIORECORDER_H

@@ -7,7 +7,6 @@ win32:INCLUDEPATH += $$PWD
 
 HEADERS = \
     Audio.h \
-    GetFrequencies.h \
     Sound.h \
     asciibreaker.h \
     audiorecorder.h \

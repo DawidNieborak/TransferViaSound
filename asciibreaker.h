@@ -12,10 +12,6 @@ private:
     std::vector<int> lowerBound{896, 1408, 1920, 2432, 2944, 3456, 3968, 4480, 4992, 5504};
     std::vector<int> upperBound{1152, 1664, 2176, 2688, 3200, 3712, 4224, 4736, 5248, 5760};
     std::vector<int> frequency{1024, 1536, 2048, 2560, 3072, 3584, 4096, 4608, 5120, 5632};
-//    std::vector<int> numbers{0, 1, 2, 3};
-//    std::vector<int> lowerBound{896, 1670, 2690, 3715};
-//    std::vector<int> upperBound{1664, 2688, 3712, 5248};
-//    std::vector<int> frequency{1280, 2179, 3201, 4482};
     int ASCIIValue;
 
 
