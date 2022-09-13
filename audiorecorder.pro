@@ -6,22 +6,20 @@ QT += multimedia
 win32:INCLUDEPATH += $$PWD
 
 HEADERS = \
+    Audio.h \
+    GetFrequencies.h \
     Sound.h \
     asciibreaker.h \
     audiorecorder.h \
     audiolevel.h \
-    decoder.h \
-    extractor.h \
-    audioFFT.h
+    decoder.h
 
 SOURCES = \
     asciibreaker.cpp \
     decoder.cpp \
-    extractor.cpp \
     main.cpp \
     audiorecorder.cpp \
-    audiolevel.cpp \
-    audioFFT.cpp
+    audiolevel.cpp
 
 FORMS += audiorecorder.ui
 

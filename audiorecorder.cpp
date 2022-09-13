@@ -8,10 +8,12 @@
 #include <SFML/Graphics.hpp>
 
 #include "ui_audiorecorder.h"
+#include <cmath>
 #include "asciibreaker.h"
 #include "Sound.h"
+#include "GetFrequencies.h"
+#include "Audio.h"
 #include "decoder.h"
-#include "extractor.h"
 
 #include <QAudioDecoder>
 #include <QMediaRecorder>
@@ -207,13 +209,6 @@ void AudioRecorder::processBuffer(const QAudioBuffer& buffer)
         m_audioLevels.at(i)->setLevel(levels.at(i));
 }
 
-void AudioRecorder::on_pushButton_clicked()
-{
-    cpr::Response r = cpr::Get(cpr::Url{"https://zaliczeniebackend.azurewebsites.net/api/files"});
-    std::cout << r.text << std::endl;
-}
-
-
 void AudioRecorder::on_file_clicked()
 {
     QString filename= QFileDialog::getOpenFileName(this, "Choose File");
@@ -230,7 +225,7 @@ void AudioRecorder::on_file_clicked()
    QFile fileToCopy(filename);
 
    // todo: delete files from copied folder in order to prevent build failure
-   fileToCopy.setFileName(QString::fromStdString(std::to_string(number)) + "." + file.completeSuffix());
+   fileToCopy.setFileName(QString::fromStdString(std::to_string(333111222)) + "." + file.completeSuffix());
 
 
 
@@ -258,11 +253,11 @@ void AudioRecorder::on_sendButton_clicked()
 
 void AudioRecorder::on_createWav_clicked()
 {
-    //    ASCIIBreaker asciiBreaker(this->fileName.toInt());
-        // debug
+        ASCIIBreaker asciiBreaker(this->fileName.toInt());
 
 
-        ASCIIBreaker asciiBreaker(31412551);
+        // Debug
+//        ASCIIBreaker asciiBreaker(12345678);
         auto freq = asciiBreaker.ASCIIToFrequency();
 
         // debug
@@ -324,23 +319,109 @@ void AudioRecorder::on_decodeFile_clicked()
     // Read and process batches of samples until the end of file is reached
     sf::Int16 samples[1024];
     sf::Uint16 count;
-    extractor ex;
 
-    int i = 0;
+
     do
     {
         count = file.read(samples, 1024);
 
-        auto frequency = ex.extract((sizeof(samples) / sizeof(*samples)), samples, file.getSampleRate());
-        if(frequency > 800) {
-            std::cout << frequency << std::endl;
-        }
+        std::cout << samples << std::endl;
 
-        // process, analyze, play, convert, or whatever
-        // you want to do with the samples...
-        i++;
     }
     while (count > 0);
 
 
 }
+
+void AudioRecorder::on_listenBtn_clicked()
+{
+    sf::RenderWindow window(sf::VideoMode(1280, 720), "Audio-Visualizer", sf::Style::Default);
+    window.setFramerateLimit(60);
+
+    std::vector<char> code;
+    Audio audio = Audio();
+    std::thread frequencyAnalyzationThread(&Audio::getSampleOverFrequency, &audio);
+    GetFrequencies getFrequencies = GetFrequencies();
+
+
+
+
+    // Window Loop
+    while (window.isOpen())
+        {
+            sf::Event event;
+            while (window.pollEvent(event))
+            {
+                if (event.type == sf::Event::Closed) {
+
+
+                    window.close();
+                }
+
+                if (event.type == sf::Event::KeyPressed) {
+                    std::string s(code.begin(), code.end());
+                    std::cout << "CODE : " << s << std::endl;
+
+                    cpr::Response r = cpr::Get(cpr::Url{"https://zaliczeniebackend.azurewebsites.net/api/files/"+s});
+
+                    std::cout << "TOTU: " << r.status_code << std::endl;
+
+                    // DEBUG:
+                    std::cout << r.text << std::endl;
+                }
+
+            }
+
+            window.clear(sf::Color::White);
+
+            if (audio.getfrequencyVisualizationVector().size() > 120) {
+
+                getFrequencies.setAmplitudeVisualizationVector(audio.getAmplitudeVisualizationVector());
+                getFrequencies.update(audio.getfrequencyVisualizationVector(), audio.getSongPlayingOffset());
+
+
+                // Draws freq visualizer
+                std::vector<sf::RectangleShape> freqRangeRects = getFrequencies.getFreqRangeRects();
+
+                for (int i = 0; i < freqRangeRects.size(); i++) {
+//                    window.draw(freqRangeRects[i]);
+                    auto test22 = getFrequencies.getMaxFreq() * -1;
+                    auto xdd = freqRangeRects[i].getSize().y * -1;
+                    if (xdd != 0) {
+//                        std::cout << round(test22) << " ";
+
+                        Decoder decode = Decoder(round(test22));
+                        auto xd = decode.convertFrequencyToArray();
+
+                        if(xd != 0) {
+                            code.push_back(xd);
+                        }
+
+                    }
+
+                }
+
+                if (!audio.songPlayed()) {
+                    audio.playSong();
+                }
+
+            }
+
+
+
+            window.display();
+    }
+}
+
+
+void AudioRecorder::on_reciveFileMain_clicked()
+{
+
+}
+
+
+void AudioRecorder::on_sendFileMain_clicked()
+{
+
+}
+

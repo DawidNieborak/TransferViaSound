@@ -46,6 +46,8 @@ private slots:
 
     void on_decodeFile_clicked();
 
+    void on_listenBtn_clicked();
+
 private:
     void clearAudioLevels();
     QMediaFormat selectedMediaFormat() const;
