@@ -15,6 +15,19 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="2">
+     <widget class="QLabel" name="label_2">
+      <property name="maximumSize">
+       <size>
+        <width>250</width>
+        <height>50</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Status of the server accessibility</string>
+      </property>
+     </widget>
+    </item>
     <item row="1" column="0" colspan="6">
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="1">
@@ -90,16 +103,10 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="2">
-     <widget class="QLabel" name="label_2">
-      <property name="maximumSize">
-       <size>
-        <width>250</width>
-        <height>50</height>
-       </size>
-      </property>
+    <item row="2" column="0">
+     <widget class="QLabel" name="results">
       <property name="text">
-       <string>Status of the server accessibility</string>
+       <string>Results.</string>
       </property>
      </widget>
     </item>

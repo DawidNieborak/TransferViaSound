@@ -1,5 +1,4 @@
 #include "audiorecorder.h"
-#include "audiolevel.h"
 #include <cpr/cpr.h>
 #include <json/json.h>
 
@@ -12,6 +11,7 @@
 #include "Sound.h"
 #include "Audio.h"
 #include "decoder.h"
+#include "cstdlib"
 
 #include <QAudioDecoder>
 #include <QMediaRecorder>
@@ -48,7 +48,6 @@ AudioRecorder::AudioRecorder()
     }
 
     connect(m_audioRecorder, &QMediaRecorder::durationChanged, this, &AudioRecorder::updateProgress);
-    connect(m_audioRecorder, &QMediaRecorder::recorderStateChanged, this, &AudioRecorder::onStateChanged);
     connect(m_audioRecorder, &QMediaRecorder::errorChanged, this, &AudioRecorder::displayErrorMessage);
 
     // check status of the server
@@ -73,35 +72,6 @@ void AudioRecorder::updateProgress(qint64 duration)
     ui->statusbar->showMessage(tr("Recorded %1 sec").arg(duration / 1000));
 }
 
-void AudioRecorder::onStateChanged(QMediaRecorder::RecorderState state)
-{
-    QString statusMessage;
-
-    switch (state) {
-    case QMediaRecorder::RecordingState:
-        statusMessage = tr("Recording to %1").arg(m_audioRecorder->actualLocation().toString());
-//        ui->recordButton->setText(tr("Stop"));
-//        ui->pauseButton->setText(tr("Pause"));
-        break;
-    case QMediaRecorder::PausedState:
-        clearAudioLevels();
-        statusMessage = tr("Paused");
-//        ui->recordButton->setText(tr("Stop"));
-//        ui->pauseButton->setText(tr("Resume"));
-        break;
-    case QMediaRecorder::StoppedState:
-        clearAudioLevels();
-        statusMessage = tr("Stopped");
-//        ui->recordButton->setText(tr("Record"));
-//        ui->pauseButton->setText(tr("Pause"));
-        break;
-    }
-
-//    ui->pauseButton->setEnabled(m_audioRecorder->recorderState() != QMediaRecorder::StoppedState);
-    if (m_audioRecorder->error() == QMediaRecorder::NoError)
-        ui->statusbar->showMessage(statusMessage);
-}
-
 static QVariant boxValue(const QComboBox *box)
 {
     int idx = box->currentIndex();
@@ -111,28 +81,9 @@ static QVariant boxValue(const QComboBox *box)
     return box->itemData(idx);
 }
 
-void AudioRecorder::toggleRecord()
-{
-    return;
-}
-
-void AudioRecorder::togglePause()
-{
-    if (m_audioRecorder->recorderState() != QMediaRecorder::PausedState)
-        m_audioRecorder->pause();
-    else
-        m_audioRecorder->record();
-}
-
 void AudioRecorder::displayErrorMessage()
 {
     ui->statusbar->showMessage(m_audioRecorder->errorString());
-}
-
-void AudioRecorder::clearAudioLevels()
-{
-    for (auto m_audioLevel : qAsConst(m_audioLevels))
-        m_audioLevel->setLevel(0);
 }
 
 QMediaFormat AudioRecorder::selectedMediaFormat() const
@@ -173,48 +124,15 @@ QList<qreal> getBufferLevels(const QAudioBuffer &buffer)
     return max_values;
 }
 
-void AudioRecorder::processBuffer(const QAudioBuffer& buffer)
-{
-    if (m_audioLevels.count() != buffer.format().channelCount()) {
-        qDeleteAll(m_audioLevels);
-        m_audioLevels.clear();
-        for (int i = 0; i < buffer.format().channelCount(); ++i) {
-            AudioLevel *level = new AudioLevel(ui->centralwidget);
-            m_audioLevels.append(level);
-        }
-    }
-
-    QList<qreal> levels = getBufferLevels(buffer);
-    for (int i = 0; i < levels.count(); ++i)
-        m_audioLevels.at(i)->setLevel(levels.at(i));
-}
-
 void AudioRecorder::on_sendFileMain_clicked()
 {
-    QString filename= QFileDialog::getOpenFileName(this, "Choose File");
+    QString filename = QFileDialog::getOpenFileName(this, "Choose File");
+
 
    if(filename.isEmpty())
        return;
 
    int number = rand() % 90000000 + 10000000;
-   // TODO
-//   int resultNum = 0;
-//   int ngenNumber[8];
-//   for(int i = 0; i < 30; i++) {
-//       int random = (rand() % 10) + 1;
-//       if((sizeof(ngenNumber)/sizeof(*ngenNumber)) >= 8) {
-//           break;
-//       }
-//       if(random != 0 ) {
-//           ngenNumber[i] = random;
-//       }
-//   }
-
-//   for ( const auto digit : ngenNumber )
-//   {
-//       std::cout << "TTT: " << digit << std::endl;
-//       resultNum = resultNum * 10 + digit;
-//   }
    std::cout << "OUTPUY NUMBER: " << number << std::endl;
 
    QFileInfo file(filename);
@@ -249,7 +167,7 @@ void AudioRecorder::on_sendFileMain_clicked()
 void AudioRecorder::generateSineWave() {
     ASCIIBreaker asciiBreaker(this->fileName.toInt());
     auto freq = asciiBreaker.ASCIIToFrequency();
-    sf::RenderWindow window(sf::VideoMode (100,500), "Close to stop");
+    sf::RenderWindow window(sf::VideoMode (500,500), "Close to stop");
 
     const unsigned short n_frequencies = 8;
     sf::SoundBuffer buffer;
@@ -303,21 +221,40 @@ void AudioRecorder::on_reciveFileMain_clicked()
         clock_t now = clock();
 
         m_audioRecorder->record();
-        while(clock() - now < time);
+
+        while(clock() - now < time)
+
         m_audioRecorder->stop();
+        decode();
+
 
     }
     else {
         m_audioRecorder->stop();
     }
 
+    QFile fileToDelete = QFile("recorderAudio");
+    fileToDelete.remove();
 }
 
 // generate sfml window and decode;
 void AudioRecorder::decode() {
-    sf::RenderWindow window(sf::VideoMode(100, 500), "Audio-decoder Close to Stop", sf::Style::Default);
+    sf::RenderWindow window(sf::VideoMode(500, 500), "Audio-decoder Close to Stop", sf::Style::Default);
     window.setFramerateLimit(60);
 
     Audio audio = Audio();
     std::thread frequencyAnalyzationThread(&Audio::getSampleOverFrequency, &audio);
+
+    auto decoded = audio.results;
+
+    std::string s(decoded.begin(), decoded.end());
+
+    cpr::Response r = cpr::Get(cpr::Url{"https://zaliczeniebackend.azurewebsites.net/api/files/"+s});
+
+    if(r.status_code == 200) {
+        ui->results->setText(QString::fromStdString(r.text));
+    } else {
+        ui->statusbar->showMessage("Couldn't get the file.");
+    }
+
 }

@@ -20,20 +20,11 @@ class AudioRecorder : public QMainWindow
 
 public:
     AudioRecorder();
-    QUrl musicFilePath;
     QString filePath;
     QString fileName;
 
 
-public slots:
-    void processBuffer(const QAudioBuffer&);
-
 private slots:
-    void togglePause();
-
-    void toggleRecord();
-
-    void onStateChanged(QMediaRecorder::RecorderState);
 
     void updateProgress(qint64 pos);
 
@@ -48,7 +39,6 @@ private slots:
     void on_reciveFileMain_clicked();
 
 private:
-    void clearAudioLevels();
     QMediaFormat selectedMediaFormat() const;
 
     Ui::AudioRecorder *ui = nullptr;

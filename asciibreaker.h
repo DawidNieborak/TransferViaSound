@@ -14,7 +14,7 @@ private:
     std::vector<int> frequency{1024, 1536, 2048, 2560, 3072, 3584, 4096, 4608, 5120, 5632};
     int ASCIIValue;
 
-
+public:
     // getters
     std::vector<int> getNumbers() {
         return this->numbers;

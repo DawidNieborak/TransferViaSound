@@ -35,8 +35,8 @@ public:
     std::vector< std::complex <double> > leftSamples;
     std::vector<double> sampleFrequencyRanges;
     std::vector< std::vector <double> > frequencyWindowMagnitudes;
-    std::vector< std::vector <double> > frequencyVisualizationVector;
     std::vector< double > amplitudeVisualizationVector;
+    std::vector<int> results;
 
     sf::SoundBuffer buffer;
     sf::Sound song;
@@ -115,10 +115,6 @@ public:
             return song.getPlayingOffset().asSeconds();
         }
 
-        std::vector< std::vector <double> >& getfrequencyVisualizationVector() {
-            return frequencyVisualizationVector;
-        }
-
         std::vector<double>& getAmplitudeVisualizationVector() {
             return amplitudeVisualizationVector;
         }
@@ -170,14 +166,15 @@ public:
 
                     }
 
-//                    std::cout << "MAX: " << maxInd << std::endl;
-                    auto OMG = (double)sampleRate * maxInd / (leftSampleSample_FreqBin.size() / 2 );
-                    if(OMG > 896 && OMG < 6000) {
-//                        std::cout << "XD: " << OMG << std::endl;
 
-                        Decoder decode = Decoder(OMG);
+                    // calculate frequency and decode.
+                    auto result = (double)sampleRate * maxInd / (leftSampleSample_FreqBin.size() / 2 );
+                    if(result > 60 && result < 2720) {
+
+                        Decoder decode = Decoder(result);
                         auto number = decode.convertFrequencyToArray();
-                        std::cout << "FREQUENCY/NUMBER: " << OMG << " " << number << std::endl;
+                        results.push_back(number);
+                        std::cout << "FREQUENCY/NUMBER: " << result << " " << number << std::endl;
                     }
 
                 }
@@ -260,9 +257,6 @@ public:
                 if (magnitude == 0.0) {
                     magnitude = 1;
                 }
-//                else if (magnitude > 400.0) {
-//                    magnitude = 400.0;
-//                }
 
 
                 magnitude_sum += magnitude;
@@ -288,57 +282,8 @@ public:
                 }
 
             }
-//            Decoder decode = Decoder(round(max)) ;
-//            auto number = decode.convertFrequencyToArray();
-//            std::cout << "FREQUENCY/NUMBER: " << round(max) << " " << number << std::endl;
-
-
-//            auto result = *max_element(frequencyMagnitude.begin(), frequencyMagnitude.end());
-//            auto scaled = (result);
-
-
-//            if(scaled >= 0 && scaled <= 704 && !hasAppended) {
-//                Decoder decode = Decoder(round(scaled)) ;
-//                auto number = decode.convertFrequencyToArray();
-//                std::cout << "FREQUENCY/NUMBER: " << round(scaled) << " " << number << std::endl;
-//            }
-//            else if(result >= 8970 && result <= 9030) {
-//                // End of one digit
-//                this->hasAppended = false;
-//            }
-
 
             return frequencyMagnitude;
-        }
-
-        // Averages overlapping windows
-        void averageOverlapWindows(std::vector< std::vector <double> > frequencyWindowMagnitudes) {
-
-            int window = frequencyWindowMagnitudes.size() - 1;
-
-            std::vector <double> firstWindow = frequencyWindowMagnitudes[window - 2];
-            std::vector <double> secondWindow = frequencyWindowMagnitudes[window - 1]; // the overlapping window
-            std::vector <double> thirdWindow = frequencyWindowMagnitudes[window];
-
-
-            // Gets the averages of the overlapping first and second window and replaces the original firstWindow values with those averages
-            for (int freq = firstWindow.size()/2; freq < firstWindow.size(); freq++) {
-                double avgFreq = (firstWindow[freq] + secondWindow[freq]) / 2;
-
-                firstWindow[freq] = avgFreq;
-            }
-
-            // Gets the averages of the overlapping third and second window and replaces the original thirdWindow values with those averages
-            for (int freq = 0; freq < thirdWindow.size()/2; freq++) {
-                double avgFreq = (thirdWindow[freq] + secondWindow[freq]) / 2;
-                thirdWindow[freq] = avgFreq;
-            }
-
-
-
-            frequencyVisualizationVector.push_back(firstWindow);
-            frequencyVisualizationVector.push_back(thirdWindow);
-
         }
 
 

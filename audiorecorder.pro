@@ -10,15 +10,13 @@ HEADERS = \
     Sound.h \
     asciibreaker.h \
     audiorecorder.h \
-    audiolevel.h \
     decoder.h
 
 SOURCES = \
     asciibreaker.cpp \
     decoder.cpp \
     main.cpp \
-    audiorecorder.cpp \
-    audiolevel.cpp
+    audiorecorder.cpp
 
 FORMS += audiorecorder.ui
 
